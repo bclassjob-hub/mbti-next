@@ -1,7 +1,23 @@
 const TYPES=['ISTJ','ISFJ','INFJ','INTJ','ISTP','ISFP','INFP','INTP','ESTP','ESFP','ENFP','ENTP','ESTJ','ESFJ','ENFJ','ENTJ'];
 const GC={ST:'st',SF:'sf',NF:'nf',NT:'nt'}; const cache={}; let state={type:null,tab:'celeb',idx:0};
 const E=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
-async function load(t){if(cache[t])return cache[t]; const r=await fetch(`data/${t.toLowerCase()}.json`); if(!r.ok)throw Error('데이터를 불러오지 못했습니다.'); return cache[t]=await r.json();}
+let ALL=null;
+async function loadAll(){
+  if(ALL)return ALL;
+  if(!('DecompressionStream' in window))throw Error('이 브라우저는 압축 데이터 해제를 지원하지 않습니다. 최신 Safari·Chrome·Samsung Internet으로 열어주세요.');
+  const parts=await Promise.all([...Array(8).keys()].map(async i=>{
+    const r=await fetch(`data/chunk${i}.txt`);
+    if(!r.ok)throw Error(`데이터 파일 ${i}을 불러오지 못했습니다.`);
+    return r.text();
+  }));
+  const bin=atob(parts.join(''));
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  ALL=JSON.parse(await new Response(stream).text());
+  return ALL;
+}
+async function load(t){if(cache[t])return cache[t];const all=await loadAll();return cache[t]=all[t];}
 function home(){document.getElementById('app').innerHTML=`<div class="wrap"><div class="brand"><div class="logo">M</div>MBTI NEXT</div><section class="home"><div class="hero"><div class="kicker">YOUR TYPE, YOUR NEXT STEP</div><h1>내 MBTI를 선택하세요</h1><p class="lead">16개 유형 전체가 연결된 통합 버전입니다. <b>인물 설명 · 추천 활동 · 도전 활동</b>을 확인해보세요.</p><div class="grid">${TYPES.map(t=>`<button class="typeBtn ${GC[groupOf(t)]}" onclick="openType('${t}')">${t}</button>`).join('')}</div><div class="legend"><span>ST</span><span>SF</span><span>NF</span><span>NT</span></div><div class="note">유명인의 MBTI는 대부분 비공식 추정입니다. 공개된 경력과 대외 이미지를 유형의 선호 특성과 연결한 수업용 예시이며 실제 성격을 단정하는 자료가 아닙니다.</div><div class="signatureHero">MADE BY <b>RANCHO</b></div></div></section></div>`}
 function groupOf(t){return ['ISTJ','ISTP','ESTP','ESTJ'].includes(t)?'ST':['ISFJ','ISFP','ESFP','ESFJ'].includes(t)?'SF':['INFJ','INFP','ENFP','ENFJ'].includes(t)?'NF':'NT'}
 async function openType(t){state={type:t,tab:'celeb',idx:0}; document.getElementById('app').innerHTML='<div class="loading">불러오는 중…</div>'; try{await load(t); render()}catch(e){document.getElementById('app').innerHTML=`<div class="wrap"><div class="error">${E(e.message)}</div></div>`}}
