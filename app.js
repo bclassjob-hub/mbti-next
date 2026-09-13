@@ -5,9 +5,10 @@ let ALL=null;
 async function loadAll(){
   if(ALL)return ALL;
   if(!('DecompressionStream' in window))throw Error('이 브라우저는 압축 데이터 해제를 지원하지 않습니다. 최신 Safari·Chrome·Samsung Internet으로 열어주세요.');
-  const parts=await Promise.all([...Array(8).keys()].map(async i=>{
-    const r=await fetch(`data/chunk${i}.txt`);
-    if(!r.ok)throw Error(`데이터 파일 ${i}을 불러오지 못했습니다.`);
+  const files=['chunk0.txt','chunk1.txt','chunk2a.txt','chunk2bfix.txt','chunk3a.txt','chunk3b.txt','chunk4.txt','chunk5.txt','chunk6.txt','chunk7.txt'];
+  const parts=await Promise.all(files.map(async name=>{
+    const r=await fetch(`data/${name}`);
+    if(!r.ok)throw Error(`데이터 파일 ${name}을 불러오지 못했습니다.`);
     return r.text();
   }));
   const bin=atob(parts.join(''));
