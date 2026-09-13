@@ -18,7 +18,16 @@ async function loadAll(){
   ALL=JSON.parse(await new Response(stream).text());
   return ALL;
 }
-async function load(t){if(cache[t])return cache[t];const all=await loadAll();return cache[t]=all[t];}
+async function load(t){
+  if(cache[t])return cache[t];
+  if(t==='ENFP'){
+    const r=await fetch('data/enfp.json?v=20260913-easter2',{cache:'no-store'});
+    if(!r.ok)throw Error('ENFP 데이터를 불러오지 못했습니다.');
+    return cache[t]=await r.json();
+  }
+  const all=await loadAll();
+  return cache[t]=all[t];
+}
 function home(){document.getElementById('app').innerHTML=`<div class="wrap"><div class="brand"><div class="logo">M</div>MBTI NEXT</div><section class="home"><div class="hero"><div class="kicker">YOUR TYPE, YOUR NEXT STEP</div><h1>내 MBTI를 선택하세요</h1><p class="lead">16개 유형 전체가 연결된 통합 버전입니다. <b>인물 설명 · 추천 활동 · 도전 활동</b>을 확인해보세요.</p><div class="grid">${TYPES.map(t=>`<button class="typeBtn ${GC[groupOf(t)]}" onclick="openType('${t}')">${t}</button>`).join('')}</div><div class="legend"><span>ST</span><span>SF</span><span>NF</span><span>NT</span></div><div class="note">유명인의 MBTI는 대부분 비공식 추정입니다. 공개된 경력과 대외 이미지를 유형의 선호 특성과 연결한 수업용 예시이며 실제 성격을 단정하는 자료가 아닙니다.</div><div class="signatureHero">MADE BY <b>RANCHO</b></div></div></section></div>`}
 function groupOf(t){return ['ISTJ','ISTP','ESTP','ESTJ'].includes(t)?'ST':['ISFJ','ISFP','ESFP','ESFJ'].includes(t)?'SF':['INFJ','INFP','ENFP','ENFJ'].includes(t)?'NF':'NT'}
 async function openType(t){state={type:t,tab:'celeb',idx:0}; document.getElementById('app').innerHTML='<div class="loading">불러오는 중…</div>'; try{await load(t); render()}catch(e){document.getElementById('app').innerHTML=`<div class="wrap"><div class="error">${E(e.message)}</div></div>`}}
