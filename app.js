@@ -21,7 +21,7 @@ async function loadAll(){
 async function load(t){
   if(cache[t])return cache[t];
   if(t==='ENFP'){
-    const r=await fetch('data/enfp.json?v=20260913-easter2',{cache:'no-store'});
+    const r=await fetch('data/types/enfp.json?v=20260913-easter3',{cache:'no-store'});
     if(!r.ok)throw Error('ENFP 데이터를 불러오지 못했습니다.');
     return cache[t]=await r.json();
   }
