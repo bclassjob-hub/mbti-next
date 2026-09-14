@@ -29,7 +29,7 @@ async function load(t){
   const all=await loadAll();
   return cache[t]=all[t];
 }
-function brand(){return `<div class="brand"><div class="logo">T</div><div><div class="brandName">TYPE NEXT</div><div class="brandSub">네 글자 다음은?</div></div></div>`}
+function brand(){return `<button class="brand" onclick="home()" aria-label="TYPE NEXT 첫 화면으로" style="background:none;padding:0;color:inherit;text-align:left">`+`<div class="logo">T</div><div><div class="brandName">TYPE NEXT</div><div class="brandSub">네 글자 다음은?</div></div></button>`}
 function home(){document.getElementById('app').innerHTML=`<div class="wrap">${brand()}<section class="home"><div class="hero"><div class="kicker">YOUR TYPE, YOUR NEXT STEP</div><h1>네 글자 다음은?</h1><p class="lead">내 유형을 선택하고 <b>유명인 · 추천 활동 · 도전 활동</b>을 확인해보세요.</p><div class="grid">${TYPES.map(t=>`<button class="typeBtn ${GC[groupOf(t)]}" onclick="openType('${t}')">${t}</button>`).join('')}</div><div class="legend"><span>ST</span><span>SF</span><span>NF</span><span>NT</span></div><div class="note">유명인의 유형은 대부분 비공식 추정입니다. 공개된 경력과 대외 이미지를 유형의 선호 특성과 연결한 수업용 예시이며 실제 성격을 단정하는 자료가 아닙니다.</div><div class="signatureHero">MADE BY <b>RANCHO</b></div>${LEGAL}</div></section></div>`}
 function groupOf(t){return ['ISTJ','ISTP','ESTP','ESTJ'].includes(t)?'ST':['ISFJ','ISFP','ESFP','ESFJ'].includes(t)?'SF':['INFJ','INFP','ENFP','ENFJ'].includes(t)?'NF':'NT'}
 async function openType(t){state={type:t,tab:'celeb',idx:0}; document.getElementById('app').innerHTML='<div class="loading">불러오는 중…</div>'; try{await load(t); render()}catch(e){document.getElementById('app').innerHTML=`<div class="wrap"><div class="error">${E(e.message)}</div></div>`}}
